@@ -11,13 +11,12 @@ import (
 var IsGameEnd = false
 
 var _clear map[string]func()
-//var
-const Cirle string = "o"
+
+const Circle string = "o"
 const Cross string = "x"
 
-// is Cirle turn
-var isCircleTurn = false
-var cols = make([][]string, 3)
+var IsPlayerTurn = false
+var Board = make([][]string, 3)
 
 func init() {
 	FillZeroValues()
@@ -27,7 +26,7 @@ func init() {
 	_clear[runtime.GOOS] = func() {
 		var cmd *exec.Cmd
 
-		switch os := runtime.GOOS; os {
+		switch pcOs := runtime.GOOS; pcOs {
 		case "darwin", "linux":
 			cmd = exec.Command("clear")
 		case "windows":
@@ -35,7 +34,7 @@ func init() {
 				cmd = exec.Command("cmd", "/c", "cls")
 			}
 		default:
-			cmd = exec.Command("echo", os+" platform is unsupported! I can't clear terminal screen :(")
+			cmd = exec.Command("echo", pcOs+" platform is unsupported! I can't clear terminal screen :(")
 		}
 
 		cmd.Stdout = os.Stdout
@@ -45,51 +44,51 @@ func init() {
 
 func FillZeroValues()  {
 	// creating matrix slice
-	for i := 0; i < len(cols); i++ {
-		cols[i] = make([]string, 3)
+	for i := 0; i < len(Board); i++ {
+		Board[i] = make([]string, 3)
 		for k := 0; k < 3; k++ {
-			cols[i][k] = strconv.Itoa(i + k + 1)
+			Board[i][k] = "_"//strconv.Itoa(i + k + 1)
 		}
 	}
 }
 
 func getWinner() (bool, string) {
-	shape := Cirle
+	shape := Circle
 
 	for i := 0; i < 2; i++ {
 		// я не помню когда писал хуже, но в 3 часа ночи
 		// это показалось вполне правильным решением
-		if shape == cols[0][0] &&
-			shape == cols[0][1] &&
-			shape == cols[0][2] || // first horizontal
+		if shape == Board[0][0] &&
+			shape == Board[0][1] &&
+			shape == Board[0][2] || // first horizontal
 
-			shape == cols[1][0] &&
-				shape == cols[1][1] &&
-				shape == cols[1][2] || // second horizontal
+			shape == Board[1][0] &&
+				shape == Board[1][1] &&
+				shape == Board[1][2] || // second horizontal
 
-			shape == cols[2][0] &&
-				shape == cols[2][1] &&
-				shape == cols[2][2] || // third horizontal
+			shape == Board[2][0] &&
+				shape == Board[2][1] &&
+				shape == Board[2][2] || // third horizontal
 
-			shape == cols[0][0] &&
-				shape == cols[1][0] &&
-				shape == cols[2][0] || // first vertical
+			shape == Board[0][0] &&
+				shape == Board[1][0] &&
+				shape == Board[2][0] || // first vertical
 
-			shape == cols[0][1] &&
-				shape == cols[1][1] &&
-				shape == cols[2][1] || // second vertical
+			shape == Board[0][1] &&
+				shape == Board[1][1] &&
+				shape == Board[2][1] || // second vertical
 
-			shape == cols[0][2] &&
-				shape == cols[1][2] &&
-				shape == cols[2][2] || // third vertical
+			shape == Board[0][2] &&
+				shape == Board[1][2] &&
+				shape == Board[2][2] || // third vertical
 
-			shape == cols[0][0] &&
-				shape == cols[1][1] &&
-				shape == cols[2][2] || // first diagonally
+			shape == Board[0][0] &&
+				shape == Board[1][1] &&
+				shape == Board[2][2] || // first diagonally
 
-			shape == cols[0][2] &&
-				shape == cols[1][1] &&
-				shape == cols[2][0] { // second diagonally
+			shape == Board[0][2] &&
+				shape == Board[1][1] &&
+				shape == Board[2][0] { // second diagonally
 			return true, shape
 		}
 
@@ -111,7 +110,7 @@ func getIsNoMoves() bool {
 
 	for i := 0; i < 3; i++ {
 		for j := 0; j < 3; j++ {
-			if cols[i][j] != Cirle && cols[i][j] != Cross {
+			if Board[i][j] != Circle && Board[i][j] != Cross {
 				gE = false
 				break
 			}
@@ -158,18 +157,18 @@ func AppendShape(i int) {
 		subIndex = 2
 	}
 
-	if cols[index][subIndex] == Cirle || cols[index][subIndex] == Cross {
+	if Board[index][subIndex] == Circle || Board[index][subIndex] == Cross {
 		HighlightText("You can't walk here")
 		return
 	}
 
-	if isCircleTurn {
-		cols[index][subIndex] = Cirle
+	if IsPlayerTurn {
+		Board[index][subIndex] = Circle
 	} else {
-		cols[index][subIndex] = Cross
+		Board[index][subIndex] = Cross
 	}
 
-	isCircleTurn = !isCircleTurn
+	IsPlayerTurn = !IsPlayerTurn
 
 	RedrawMap()
 
@@ -178,7 +177,6 @@ func AppendShape(i int) {
 		displayWinner(char)
 		return
 	} else {
-
 		// is end
 		if isGe := getIsNoMoves(); isGe {
 			if isGe {
@@ -189,10 +187,10 @@ func AppendShape(i int) {
 		}
 	}
 
-	if isCircleTurn {
-		HighlightText(Cross + " made a move. Now it's " + Cirle + "'s turn")
+	if !IsPlayerTurn {
+		HighlightText("you (" + Circle + ") made a move. Now it's bot (" + Cross + ") turn")
 	} else {
-		HighlightText(Cirle + " made a move. Now it's " + Cross + "'s turn")
+		HighlightText( "Bot made a move. Now it's your's (" + Circle + ") turn")
 	}
 }
 
@@ -215,10 +213,10 @@ func RedrawMap() {
 				curI = (i * 3) + (j + 1)
 			}
 
-			if _, err := strconv.Atoi(cols[i][j]); err == nil { //
+			if _, err := strconv.Atoi(Board[i][j]); err == nil { //
 				fmt.Print(curI)
 			} else {
-				fmt.Print(cols[i][j])
+				fmt.Print(Board[i][j])
 			}
 
 			if j != 2 {

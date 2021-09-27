@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/eiannone/keyboard"
 	"strconv"
+	"tictactoe/bot"
 	"tictactoe/draw"
 )
 
@@ -12,6 +13,7 @@ func listenUserInput() {
 	if err != nil {
 		panic(err)
 	}
+
 	defer func() {
 		_ = keyboard.Close()
 	}()
@@ -33,10 +35,14 @@ func listenUserInput() {
 		switch key := event.Rune; key {
 		case '1', '2', '3', '4', '5', '6', '7', '8', '9':
 			{
-				if v, err := strconv.Atoi(string(event.Rune)); err == nil {
-					draw.AppendShape(v)
+				if draw.IsPlayerTurn {
+					if v, err := strconv.Atoi(string(event.Rune)); err == nil {
+						//player turn
+						draw.AppendShape(v)
+						// bot turn
+						bot.Move()
+					}
 				}
-
 			}
 		default:
 			{
@@ -51,10 +57,11 @@ func startNewGame() {
 	draw.Clear()
 	draw.IsGameEnd = false
 	draw.RedrawMap()
+	bot.Move()
 	draw.HighlightText("Welcome to tic-tac-toe terminal game")
-	draw.HighlightText("In front of your terminal with cells with numbers inside")
-	draw.HighlightText("To start the game, press the key with the cell number")
-	draw.HighlightText(draw.Cross + " goes first")
+	draw.HighlightText("In front of your terminal with cells and rows")
+	draw.HighlightText("To start the game, press the number key on your keyboard (not numpad)")
+	draw.HighlightText(draw.Cross + " (bot) always goes first (i'm lazy to rewrite it, sorry)")
 	draw.HighlightText("Press ESC to quit")
 	draw.HighlightText("or ENTER to restart")
 }
