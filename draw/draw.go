@@ -15,7 +15,7 @@ var _clear map[string]func()
 const Circle string = "o"
 const Cross string = "x"
 
-var IsPlayerTurn = false
+var IsPlayerTurn = true
 var Board = make([][]string, 3)
 
 func init() {
@@ -98,6 +98,25 @@ func getWinner() (bool, string) {
 	return false, ""
 }
 
+func BoardPos(i int) (int,int) {
+	var index int
+	var subIndex int
+
+	if i > 3 && i <= 6 { // second row
+		index = 1
+	} else if i > 6 && i <= 9 { // third row
+		index = 2
+	} // else will be default value
+
+	subIndex = (i % 3) - 1
+
+	if subIndex == -1 {
+		subIndex = 2
+	}
+
+	return index, subIndex
+}
+
 func showNoMovesLeft()  {
 	HighlightText("No any moves left. Game is end.")
 	HighlightText("Press ESC to quit")
@@ -142,20 +161,7 @@ func AppendShape(i int) {
 		return
 	}
 
-	var index int
-	var subIndex int
-
-	if i > 3 && i <= 6 { // second row
-		index = 1
-	} else if i > 6 && i <= 9 { // third row
-		index = 2
-	} // else will be default value
-
-	subIndex = (i % 3) - 1
-
-	if subIndex == -1 {
-		subIndex = 2
-	}
+	index, subIndex := BoardPos(i)
 
 	if Board[index][subIndex] == Circle || Board[index][subIndex] == Cross {
 		HighlightText("You can't walk here")

@@ -1,9 +1,9 @@
 package bot
 
 import (
-	"fmt"
 	"math"
 	"tictactoe/draw"
+	"time"
 )
 
 type bestMove struct {
@@ -194,32 +194,43 @@ func findBestMove(board [][]string) bestMove {
 	return bs
 }
 
-func Move()  {
+func Move() {
 	bs := findBestMove(draw.Board)
-	fmt.Println(bs)
+	time.Sleep(500 * time.Millisecond)
 	i := 0
-	switch row := bs.row; row{
-	case 0: {
-		i = 0
-	}
-	case 1: {
-		i = 3
-	}
-	case 2: {
-		i = 6
-	}
+	switch row := bs.row; row {
+	case 0:
+		{
+			i = 0
+		}
+	case 1:
+		{
+			i = 3
+		}
+	case 2:
+		{
+			i = 6
+		}
 	}
 
-	switch col := bs.col; col{
-	case 0: {
-		i += 1
+	switch col := bs.col; col {
+	case 0:
+		{
+			i += 1
+		}
+	case 1:
+		{
+			i += 2
+		}
+	case 2:
+		{
+			i += 3
+		}
 	}
-	case 1: {
-		i += 2
-	}
-	case 2: {
-		i += 3
-	}
+
+	// bot doesn't know best move. value is -1. Game is Over
+	if i < 1 {
+		return
 	}
 
 	draw.AppendShape(i)
